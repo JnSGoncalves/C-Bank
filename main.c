@@ -5,14 +5,6 @@ int main(){
 
     int opcao;
     do{
-// 1. Novo cliente
-// 2. Apaga cliente
-// 3. Listar clientes
-// 4. Débito
-// 5. Depósito
-// 6. Extrato
-// 7. Transferência Entre Contas
-
         printf("\nMenu\n\n");
 
         printf("1. Novo cliente.\n");
