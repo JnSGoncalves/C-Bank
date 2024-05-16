@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include "funcoes.h"
 
-int main(){
+int main() {
     printf("Banco - Quem Poupa Tem!\n");
 
     conta clientes[Tamanho_clientes];
     int pos = 0;
 
     int opcao;
-    do{
+    do {
         printf("\nMenu\n\n");
 
         printf("1. Novo cliente.\n");
@@ -20,11 +20,11 @@ int main(){
         printf("7. Transferência entre contas.\n");
         printf("0. Sair\n");
 
-        printf("\nDigite o número da opreção desejada: ");
+        printf("\nDigite o número da operação desejada: ");
         scanf("%d", &opcao);
         clearBuffer();
-        
-        switch (opcao){
+
+        switch (opcao) {
             case 1:
                 add_cliente(clientes, &pos);
                 break;
@@ -32,7 +32,7 @@ int main(){
                 printf("Excluir conta\n");
                 break;
             case 3:
-                printf("Listar clientes.\n");
+                listar_clientes(clientes, pos);
                 break;
             case 4:
                 printf("Débito.\n");
@@ -53,5 +53,6 @@ int main(){
         }
     } while (opcao != 0);
 
-    printf("Saindo...");
+    printf("Saindo...\n");
+    return 0;
 }
