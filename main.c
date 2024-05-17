@@ -37,7 +37,7 @@ int main() {
                 break;
             }
             case 3:
-                listar_clientes(clientes, pos);
+                listar_clientes(clientes, &pos);
                 break;
             case 4:
                 printf("Débito.\n");
@@ -49,7 +49,7 @@ int main() {
                 printf("Extrato.\n");
                 break;
             case 7:
-                printf("Transferência entre contas.\n");
+                transferencia(clientes, &pos);
                 break;
             case 0:
                 break;
