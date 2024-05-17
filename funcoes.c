@@ -18,6 +18,21 @@
 //     return 1;
 // }
 
+int getIndex_cpf(const conta clientes[], int *pos){
+    char cpf[Max_CPF];
+    fgets(cpf, Max_CPF, stdin);
+    cpf[strcspn(cpf, "\n")] = '\0';
+
+    int index;
+    for (index = 0; index < *pos; index++){
+        if (strcmp(cpf, clientes[index].cpf) == 0){
+            return index;
+            break;
+        }
+    }
+    return -1;
+}
+
 // 1. Novo cliente.
 int add_cliente(conta clientes[], int *pos){
     printf("\n\nCadastro de novo Cliente\n");
@@ -27,9 +42,9 @@ int add_cliente(conta clientes[], int *pos){
     }
 
     char cpf[Max_CPF];
+
     printf("Digite seu CPF: ");
     fgets(cpf, Max_CPF, stdin);
-
     cpf[strcspn(cpf, "\n")] = '\0';
 
     for (int i = 0; i < *pos; i++){
@@ -38,7 +53,6 @@ int add_cliente(conta clientes[], int *pos){
     }
     strcpy(clientes[*pos].cpf, cpf);
 
-    clearBuffer();
     
     printf("Digite seu nome: ");
     fgets(clientes[*pos].nome, Max_string, stdin);
@@ -84,12 +98,12 @@ int add_cliente(conta clientes[], int *pos){
 
 
 // 3. Listar clientes.
-void listar_clientes(conta clientes[], int pos) {
+void listar_clientes(conta clientes[], const int *pos){
     printf("\n\nLista de Clientes\n");
-    if (pos == 0) {
+    if (*pos == 0) {
         printf("Nenhum cliente cadastrado.\n");
     } else {
-        for (int i = 0; i < pos; i++) {
+        for (int i = 0; i < *pos; i++) {
             printf("Cliente %d:\n", i + 1);
             printf("CPF: %s\n", clientes[i].cpf);
             printf("Nome: %s\n", clientes[i].nome);
@@ -115,21 +129,11 @@ int transferencia(conta clientes[], int *pos){
     printf("\n\nTransferência de valores.\n");
 
 
-    char cpf_origem[Max_CPF];
     printf("Digite seu CPF: ");
-    fgets(cpf_origem, Max_CPF, stdin);
-
-    cpf_origem[strcspn(cpf_origem, "\n")] = '\0';
-    int pos_origem;
-    int verifi;
-    for (pos_origem = 0; pos_origem < *pos; pos_origem++){
-        if (strcmp(cpf_origem, clientes[pos_origem].cpf) == 0){
-            int verifi = 1;
-            break;
-        }
-    }
-    if (verifi != 1)
+    int pos_origem = getIndex_cpf(clientes, pos);
+    if (pos_origem == -1){
         return CPF_nao_cadastrado;
+    }
 
 
     char senha[Max_senha];
@@ -140,25 +144,62 @@ int transferencia(conta clientes[], int *pos){
         return Senha_incorreta;
     };
 
-
-    char cpf_destino[Max_CPF];
+    
     printf("Digite o CPF cadastrado na conta de destino: ");
-    fgets(cpf_destino, Max_CPF, stdin);
+    int pos_destino = getIndex_cpf(clientes, pos);
+    if (pos_destino == -1){
+        return CPF_nao_cadastrado;
+    }
 
-    cpf_destino[strcspn(cpf_destino, "\n")] = '\0';
-    int pos_destino;
-    verifi = 0;
-    for (pos_destino = 0; pos_destino < *pos; pos_destino++){
-        if (strcmp(pos_destino, clientes[pos_destino].cpf) == 0){
-            int verifi = 1;
-            break;
+    float valor;
+    printf("Digite o valor que deseja transferir para %s: ", clientes[pos_destino].nome);
+    int verif = scanf("%f", &valor);
+    clearBuffer();
+    if (verif != 1 || valor < 0 || (int)(valor * 1000) % 10 != 0){
+        return Valor_invalido;
+    }
+
+    if (clientes[pos_origem].tipo_conta == 0){
+        if ((clientes[pos_origem].saldo - valor) <= Limite_Comum){
+            return Saldo_negativo_excedido;
+        }else{
+            int verif;
+            char confirm;
+            do{
+                printf("Deseja confirmar a transferência de R$ %.2f - Taxa de R$ %.2f, para %s  (s/n): ", valor, (valor * Taxa_Comum), clientes[pos_destino].nome);
+                verif = scanf("%s", &confirm);
+                clearBuffer();
+                if (verif != 1 || (confirm != 's' && confirm != 'n' && confirm != 'S' && confirm != 'N'))
+                    printf("Erro! Opção inválida\n");
+            }while (confirm != 's' && confirm != 'n' && confirm != 'S' && confirm != 'N');
+            if (verif != 1 || confirm == 'n' || confirm == 'N')
+                return Operacao_cancelada;
+
+            clientes[pos_origem].saldo -= valor;
+            valor -= valor * Taxa_Comum;
+            clientes[pos_destino].saldo += valor;
+        }
+    }else{
+        if ((clientes[pos_origem].saldo - valor) <= Limite_Plus){
+            return Saldo_negativo_excedido;
+        }else{
+            int verif;
+            char confirm;
+            do{
+                printf("Deseja confirmar a transferência de R$ %.2f - Taxa de R$ %.2f, para %s  (s/n): ", valor, (valor * Taxa_Plus), clientes[pos_destino].nome);
+                verif = scanf("%s", &confirm);
+                clearBuffer();
+                if (verif != 1 || (confirm != 's' && confirm != 'n' && confirm != 'S' && confirm != 'N'))
+                    printf("Erro! Opção inválida\n");
+            }while (confirm != 's' && confirm != 'n' && confirm != 'S' && confirm != 'N');
+            if (verif != 1 || confirm == 'n' || confirm == 'N')
+                return Operacao_cancelada;
+
+            clientes[pos_origem].saldo -= valor;
+            valor -= valor * Taxa_Plus;
+            clientes[pos_destino].saldo += valor;
         }
     }
-    if (verifi != 1)
-        return CPF_nao_cadastrado;
-
-    // Criar uma função para procurar a posição de um CPF digitado
-    // Será usado muitas vezes durante o programa
 }
 
 
