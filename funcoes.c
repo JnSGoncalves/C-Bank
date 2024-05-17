@@ -96,6 +96,28 @@ void listar_clientes(conta clientes[], int pos) {
     }
 }
 
+void deletar_conta(conta clientes[], int *pos, const char *cpf) {
+    int index = -1;
+    for (int i = 0; i < *pos; i++) {
+        if (strcmp(clientes[i].cpf, cpf) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        printf("CPF não encontrado.\n");
+        return;
+    }
+
+    for (int i = index; i < *pos - 1; i++) {
+        clientes[i] = clientes[i + 1];
+    }
+
+    (*pos)--;
+    printf("Conta com CPF %s deletada com sucesso.\n", cpf);
+}
+
 void clearBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);

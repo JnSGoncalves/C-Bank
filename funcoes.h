@@ -16,5 +16,7 @@ typedef struct {
 
 int add_cliente(conta clientes[], int *pos);
 void clearBuffer();
-void listar_clientes(conta clientes[], int pos); // Declaration added
+void listar_clientes(conta clientes[], int pos);
+void deletar_conta(conta clientes[], int *pos, const char *cpf);
+
 
