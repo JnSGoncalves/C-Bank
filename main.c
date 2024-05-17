@@ -28,9 +28,14 @@ int main() {
             case 1:
                 add_cliente(clientes, &pos);
                 break;
-            case 2:
-                printf("Excluir conta\n");
+            case 2: {
+                char cpf[Max_CPF];
+                printf("Digite o CPF da conta a ser excluída: ");
+                fgets(cpf, Max_CPF, stdin);
+                cpf[strcspn(cpf, "\n")] = '\0';
+                deletar_conta(clientes, &pos, cpf);
                 break;
+            }
             case 3:
                 listar_clientes(clientes, &pos);
                 break;

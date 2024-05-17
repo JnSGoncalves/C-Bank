@@ -203,6 +203,7 @@ int transferencia(conta clientes[], int *pos){
 }
 
 
+
 void clearBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
