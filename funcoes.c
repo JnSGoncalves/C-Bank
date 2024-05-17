@@ -37,7 +37,8 @@ int add_cliente(conta clientes[], int *pos){
     }
     strcpy(clientes[*pos].cpf, cpf);
 
-
+    clearBuffer();
+    
     printf("Digite seu nome: ");
     fgets(clientes[*pos].nome, Max_string, stdin);
     clientes[*pos].nome[strcspn(clientes[*pos].nome, "\n")] = '\0';
@@ -53,7 +54,7 @@ int add_cliente(conta clientes[], int *pos){
             printf("Erro! Opção inválida\n");
     }while (verif != 1 || tipo_conta > 1 || tipo_conta < 0);
     clientes[*pos].tipo_conta = tipo_conta;
-    
+
 
     verif = 0;
     float deposito;
@@ -78,7 +79,24 @@ int add_cliente(conta clientes[], int *pos){
     return OK;
 }
 
-void clearBuffer(){
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
+void listar_clientes(conta clientes[], int pos) {
+    printf("\n\nLista de Clientes\n");
+    if (pos == 0) {
+        printf("Nenhum cliente cadastrado.\n");
+    } else {
+        for (int i = 0; i < pos; i++) {
+            printf("Cliente %d:\n", i + 1);
+            printf("CPF: %s\n", clientes[i].cpf);
+            printf("Nome: %s\n", clientes[i].nome);
+            printf("Tipo de Conta: %s\n", clientes[i].tipo_conta == comum ? "Comum" : "Plus");
+            printf("Saldo: %.2f\n", clientes[i].saldo);
+            printf("Senha: %s\n", clientes[i].senha);
+            printf("\n");
+        }
+    }
+}
+
+void clearBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
 }
