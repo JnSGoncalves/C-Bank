@@ -95,7 +95,27 @@ int add_cliente(conta clientes[], int *pos){
 }
 
 // 2. Excluir conta.
+void deletar_conta(conta clientes[], int *pos, const char *cpf) {
+    int index = -1;
+    for (int i = 0; i < *pos; i++) {
+        if (strcmp(clientes[i].cpf, cpf) == 0) {
+            index = i;
+            break;
+        }
+    }
 
+    if (index == -1) {
+        printf("CPF não encontrado.\n");
+        return;
+    }
+
+    for (int i = index; i < *pos - 1; i++) {
+        clientes[i] = clientes[i + 1];
+    }
+
+    (*pos)--;
+    printf("Conta com CPF %s deletada com sucesso.\n", cpf);
+}
 
 // 3. Listar clientes.
 void listar_clientes(conta clientes[], const int *pos){
