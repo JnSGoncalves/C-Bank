@@ -18,6 +18,7 @@
 //     return 1;
 // }
 
+// 1. Novo cliente.
 int add_cliente(conta clientes[], int *pos){
     printf("\n\nCadastro de novo Cliente\n");
 
@@ -31,7 +32,7 @@ int add_cliente(conta clientes[], int *pos){
 
     cpf[strcspn(cpf, "\n")] = '\0';
 
-    for (int i = 0; i < Tamanho_clientes; i++){
+    for (int i = 0; i < *pos; i++){
         if (strcmp(cpf, clientes[i].cpf) == 0)
             return CPF_cadastrado;
     }
@@ -79,6 +80,10 @@ int add_cliente(conta clientes[], int *pos){
     return OK;
 }
 
+// 2. Excluir conta.
+
+
+// 3. Listar clientes.
 void listar_clientes(conta clientes[], int pos) {
     printf("\n\nLista de Clientes\n");
     if (pos == 0) {
@@ -95,6 +100,67 @@ void listar_clientes(conta clientes[], int pos) {
         }
     }
 }
+
+// 4. Débito.
+
+
+// 5. Depósito.
+
+
+// 6. Extrato.
+
+
+// 7. Transferência entre contas
+int transferencia(conta clientes[], int *pos){
+    printf("\n\nTransferência de valores.\n");
+
+
+    char cpf_origem[Max_CPF];
+    printf("Digite seu CPF: ");
+    fgets(cpf_origem, Max_CPF, stdin);
+
+    cpf_origem[strcspn(cpf_origem, "\n")] = '\0';
+    int pos_origem;
+    int verifi;
+    for (pos_origem = 0; pos_origem < *pos; pos_origem++){
+        if (strcmp(cpf_origem, clientes[pos_origem].cpf) == 0){
+            int verifi = 1;
+            break;
+        }
+    }
+    if (verifi != 1)
+        return CPF_nao_cadastrado;
+
+
+    char senha[Max_senha];
+    printf("Digite a sua senha: ");
+    fgets(senha, Max_senha, stdin);
+
+    if (strcmp(senha, clientes[pos_origem].senha) != 0){
+        return Senha_incorreta;
+    };
+
+
+    char cpf_destino[Max_CPF];
+    printf("Digite o CPF cadastrado na conta de destino: ");
+    fgets(cpf_destino, Max_CPF, stdin);
+
+    cpf_destino[strcspn(cpf_destino, "\n")] = '\0';
+    int pos_destino;
+    verifi = 0;
+    for (pos_destino = 0; pos_destino < *pos; pos_destino++){
+        if (strcmp(pos_destino, clientes[pos_destino].cpf) == 0){
+            int verifi = 1;
+            break;
+        }
+    }
+    if (verifi != 1)
+        return CPF_nao_cadastrado;
+
+    // Criar uma função para procurar a posição de um CPF digitado
+    // Será usado muitas vezes durante o programa
+}
+
 
 void clearBuffer() {
     int c;

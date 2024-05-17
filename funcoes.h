@@ -4,7 +4,7 @@
 #define Max_string 255
 
 typedef enum {comum, plus} Tipo_conta;
-enum {OK, Max_clientes_Erro, CPF_cadastrado, CPF_invalido};
+enum {OK, Max_clientes_Erro, CPF_cadastrado, CPF_invalido, CPF_nao_cadastrado, Senha_incorreta};
 
 typedef struct {
     char cpf[Max_CPF];
@@ -15,6 +15,7 @@ typedef struct {
 } conta;
 
 int add_cliente(conta clientes[], int *pos);
+void listar_clientes(conta clientes[], int pos);
+int transferencia(conta clientes[], int *pos);
 void clearBuffer();
-void listar_clientes(conta clientes[], int pos); // Declaration added
 
