@@ -118,6 +118,7 @@ void deletar_conta(conta clientes[], int *pos, const char *cpf) {
     printf("Conta com CPF %s deletada com sucesso.\n", cpf);
 }
 
+
 void clearBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
