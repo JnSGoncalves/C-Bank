@@ -187,7 +187,28 @@ int debito(conta clientes[], int *pos){
 }
 
 // 5. Depósito.
+int deposito(conta clientes[], int *pos){
+    printf("\n\nDepósito de valores.\n");
 
+    printf("Digite seu CPF: ");
+    int pos_cpf = getIndex_cpf(clientes, pos);
+    if (pos_cpf == -1){
+        return CPF_nao_cadastrado;
+    }
+
+
+    float valor;
+    printf("Digite o valor que deseja depositar: ");
+    int verif = scanf("%f", &valor);
+    clearBuffer();
+    if (verif != 1 || valor < 0 || (int)(valor * 1000) % 10 != 0){
+        return Valor_invalido;
+    }
+
+    clientes[pos_cpf].saldo += valor;
+    printf("Depósito realizado com sucesso!\n");
+    return OK;
+}
 
 // 6. Extrato.
 
