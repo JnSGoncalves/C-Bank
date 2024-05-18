@@ -95,7 +95,12 @@ int add_cliente(conta clientes[], int *pos){
 }
 
 // 2. Excluir conta.
-void deletar_conta(conta clientes[], int *pos, const char *cpf) {
+void deletar_conta(conta clientes[], int *pos) {
+    char cpf[Max_CPF];
+    printf("Digite o CPF da conta a ser excluída: ");
+    fgets(cpf, Max_CPF, stdin);
+    cpf[strcspn(cpf, "\n")] = '\0';
+    
     int index = -1;
     for (int i = 0; i < *pos; i++) {
         if (strcmp(clientes[i].cpf, cpf) == 0) {
@@ -136,7 +141,50 @@ void listar_clientes(conta clientes[], const int *pos){
 }
 
 // 4. Débito.
+int debito(conta clientes[], int *pos){
+    printf("\n\nDébito de valores.\n");
 
+    printf("Digite seu CPF: ");
+    int pos_cpf = getIndex_cpf(clientes, pos);
+    if (pos_cpf == -1){
+        return CPF_nao_cadastrado;
+    }
+
+
+    char senha[Max_senha];
+    printf("Digite a sua senha: ");
+    fgets(senha, Max_senha, stdin);
+
+    if (strcmp(senha, clientes[pos_cpf].senha) != 0){
+        return Senha_incorreta;
+    };
+
+    float valor;
+    printf("Digite o valor que deseja debitar: ");
+    int verif = scanf("%f", &valor);
+    clearBuffer();
+    if (verif != 1 || valor < 0 || (int)(valor * 1000) % 10 != 0){
+        return Valor_invalido;
+    }
+
+    if(clientes[pos_cpf].tipo_conta == comum){
+        if (clientes[pos_cpf].saldo - valor <= Limite_Comum){
+            return Saldo_negativo_excedido;
+        }else{
+            clientes[pos_cpf].saldo -= valor + (valor * Taxa_Comum);
+            printf("Débito realizado com sucesso!\n");
+            return OK;
+        }
+    }else{
+        if (clientes[pos_cpf].saldo - valor <= Limite_Plus){
+            return Saldo_negativo_excedido;
+        }else{
+            clientes[pos_cpf].saldo -= valor + (valor * Taxa_Plus);
+            printf("Débito realizado com sucesso!\n");
+            return OK;
+        }
+    }
+}
 
 // 5. Depósito.
 
@@ -179,7 +227,7 @@ int transferencia(conta clientes[], int *pos){
         return Valor_invalido;
     }
 
-    if (clientes[pos_origem].tipo_conta == 0){
+    if (clientes[pos_origem].tipo_conta == comum){
         if ((clientes[pos_origem].saldo - valor) <= Limite_Comum){
             return Saldo_negativo_excedido;
         }else{

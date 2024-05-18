@@ -22,7 +22,9 @@ typedef struct {
 int getIndex_cpf(const conta clientes[], int *pos);
 
 int add_cliente(conta clientes[], int *pos);
+void deletar_conta(conta clientes[], int *pos);
 void listar_clientes(conta clientes[], const int *pos);
+int debito(conta clientes[], int *pos);
 int transferencia(conta clientes[], int *pos);
 
 void clearBuffer();
