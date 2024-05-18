@@ -8,8 +8,8 @@
 #define Taxa_Plus 0.03
 
 typedef enum {comum, plus} Tipo_conta;
-enum {OK, Max_clientes_Erro, CPF_cadastrado, CPF_invalido, CPF_nao_cadastrado, Senha_incorreta, 
-Valor_invalido, Saldo_negativo_excedido, Operacao_cancelada};
+typedef enum {OK, Max_clientes_Erro, CPF_cadastrado, CPF_invalido, CPF_nao_cadastrado, Senha_incorreta, 
+Valor_invalido, Saldo_negativo_excedido, Operacao_cancelada, Erro_abrir, Erro_escrever} Erros;
 
 typedef struct {
     char cpf[Max_CPF];
@@ -27,6 +27,9 @@ void listar_clientes(conta clientes[], const int *pos);
 int debito(conta clientes[], int *pos);
 int deposito(conta clientes[], int *pos);
 int transferencia(conta clientes[], int *pos);
+
+int salvar(conta clientes[], int *pos);
+int carregar(conta clientes[], int *pos);
 
 void clearBuffer();
 

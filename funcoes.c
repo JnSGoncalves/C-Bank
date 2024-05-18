@@ -255,7 +255,7 @@ int transferencia(conta clientes[], int *pos){
             int verif;
             char confirm;
             do{
-                printf("Deseja confirmar a transferência de R$ %.2f - Taxa de R$ %.2f, para %s  (s/n): ", valor, (valor * Taxa_Comum), clientes[pos_destino].nome);
+                printf("Deseja confirmar a transferência de R$ %.2f (Taxa: R$ %.2f) para %s  (s/n): ", valor, (valor * Taxa_Comum), clientes[pos_destino].nome);
                 verif = scanf("%s", &confirm);
                 clearBuffer();
                 if (verif != 1 || (confirm != 's' && confirm != 'n' && confirm != 'S' && confirm != 'N'))
@@ -275,7 +275,7 @@ int transferencia(conta clientes[], int *pos){
             int verif;
             char confirm;
             do{
-                printf("Deseja confirmar a transferência de R$ %.2f - Taxa de R$ %.2f, para %s  (s/n): ", valor, (valor * Taxa_Plus), clientes[pos_destino].nome);
+                printf("Deseja confirmar a transferência de R$ %.2f (Taxa: R$ %.2f) para %s  (s/n): ", valor, (valor * Taxa_Plus), clientes[pos_destino].nome);
                 verif = scanf("%s", &confirm);
                 clearBuffer();
                 if (verif != 1 || (confirm != 's' && confirm != 'n' && confirm != 'S' && confirm != 'N'))
@@ -291,6 +291,46 @@ int transferencia(conta clientes[], int *pos){
     }
 }
 
+// Salvar em binário
+int salvar(conta clientes[], int *pos){
+    FILE *f = fopen("clientes.bin", "wb");
+    if (f == NULL){
+        return Erro_abrir;
+    }
+
+    for (int i = 0; i < *pos; i++) {
+        if (fwrite(&clientes[i], sizeof(conta), 1, f) != 1) {
+            fclose(f);
+            return Erro_escrever;
+        }
+    }
+
+    fclose(f);
+    printf("Contas salvas com sucesso.\n");
+    return OK;
+}
+
+// Carregar em binário
+int carregar(conta clientes[], int *pos){
+    FILE *f = fopen("clientes.bin", "rb");
+    if (f == NULL) {
+        return Erro_abrir;
+    }
+
+    conta cliente;
+
+	int pos_load = 0;
+    while (fread(&cliente, sizeof(conta), 1, f) == 1) {
+        clientes[pos_load] = cliente;
+        (pos_load)++;
+    }
+
+	*pos = pos_load;
+
+    fclose(f);
+    printf("Clientes carregados com sucesso.\n");
+    return OK;
+}
 
 
 void clearBuffer() {

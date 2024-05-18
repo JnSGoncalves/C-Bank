@@ -5,7 +5,11 @@ int main() {
     printf("Banco - Quem Poupa Tem!\n");
 
     conta clientes[Tamanho_clientes];
-    int pos = 0;
+    int pos;
+    int erro = carregar(clientes, &pos);
+    if (erro == Erro_abrir){
+        pos = 0;
+    }
 
     int opcao;
     do {
@@ -48,6 +52,7 @@ int main() {
                 transferencia(clientes, &pos);
                 break;
             case 0:
+                salvar(clientes, &pos);
                 break;
             default:
                 printf("Opção inválida!\n");
