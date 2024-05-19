@@ -4,25 +4,24 @@
 #include "funcoes.h"
 #include <time.h>
 
-// // Teste de verificação do tamanho do cpf digitado para não ser menor que 11 digitos e ser composto só de digitos
-// int verificarCPF(const char cpf[]){
-//     int i;
-//     if (strlen(cpf) != 11)
-//         printf("False");
-//         return 0;
-//     for (i = 0; i < 11; i++) {
-//         if (!isdigit(cpf[i]))
-//             printf("False 2");
-//             return 0;
-//     }
-//     printf("True");
-//     return 1;
-// }
+// Teste de verificação do tamanho do cpf digitado para não ser menor que 11 digitos e ser composto só de digitos
+int verificarCPF(const char cpf[]){
+    int i;
+    if (strlen(cpf) != 11)
+        return CPF_invalido;
+    for (i = 0; i < 11; i++) {
+        if (!isdigit(cpf[i]))
+            return CPF_invalido;
+    }
+    return OK;
+}
 
 int getIndex_cpf(const conta clientes[], int *pos){
     char cpf[Max_CPF];
     fgets(cpf, Max_CPF, stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
+    if (verificarCPF(cpf) != OK)
+        return -1;
 
     int index;
     for (index = 0; index < *pos; index++){
@@ -43,10 +42,11 @@ int add_cliente(conta clientes[], int *pos){
     }
 
     char cpf[Max_CPF];
-
     printf("Digite seu CPF: ");
     fgets(cpf, Max_CPF, stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
+    if (verificarCPF(cpf) != OK)
+        return CPF_invalido;
 
     for (int i = 0; i < *pos; i++){
         if (strcmp(cpf, clientes[i].cpf) == 0)
@@ -86,34 +86,32 @@ int add_cliente(conta clientes[], int *pos){
 
     printf("Digite a sua senha: ");
     fgets(clientes[*pos].senha, Max_senha, stdin);
+    clientes[*pos].senha[strcspn(clientes[*pos].senha, "\n")] = '\0';
 
-
-    printf("Cliente Cadatrado com sucesso!\n");
-    printf("%s, %s, %d, %.2f, %s", clientes[*pos].cpf, clientes[*pos].nome, clientes[*pos].tipo_conta, clientes[*pos].saldo, clientes[*pos].senha);
 
     *pos = *pos + 1;
+
+    printf("\nCliente Cadatrado com sucesso!\n");
     return OK;
 }
 
 // 2. Excluir conta.
-void deletar_conta(conta clientes[], int *pos) {
+int deletar_conta(conta clientes[], int *pos) {
     char cpf[Max_CPF];
     printf("Digite o CPF da conta a ser excluída: ");
-    fgets(cpf, Max_CPF, stdin);
-    cpf[strcspn(cpf, "\n")] = '\0';
-    
-    int index = -1;
-    for (int i = 0; i < *pos; i++) {
-        if (strcmp(clientes[i].cpf, cpf) == 0) {
-            index = i;
-            break;
-        }
+    int index = getIndex_cpf(clientes, pos);
+    if (index == -1) {
+        return CPF_nao_cadastrado;
     }
 
-    if (index == -1) {
-        printf("CPF não encontrado.\n");
-        return;
-    }
+    char senha[Max_senha];
+    printf("Digite a sua senha: ");
+    fgets(senha, Max_senha, stdin);
+    senha[strcspn(senha, "\n")] = '\0';
+
+    if (strcmp(senha, clientes[index].senha) != 0){
+        return Senha_incorreta;
+    };
 
     for (int i = index; i < *pos - 1; i++) {
         clientes[i] = clientes[i + 1];
@@ -124,10 +122,10 @@ void deletar_conta(conta clientes[], int *pos) {
 }
 
 // 3. Listar clientes.
-void listar_clientes(conta clientes[], const int *pos){
-    printf("\n\nLista de Clientes\n");
+int listar_clientes(conta clientes[], const int *pos){
+    printf("\n\nLista de Clientes\n\n");
     if (*pos == 0) {
-        printf("Nenhum cliente cadastrado.\n");
+        printf("\nNenhum cliente cadastrado.\n");
     } else {
         for (int i = 0; i < *pos; i++) {
             printf("Cliente %d:\n", i + 1);
@@ -135,18 +133,17 @@ void listar_clientes(conta clientes[], const int *pos){
             printf("Nome: %s\n", clientes[i].nome);
             printf("Tipo de Conta: %s\n", clientes[i].tipo_conta == comum ? "Comum" : "Plus");
             printf("Saldo: %.2f\n", clientes[i].saldo);
-            printf("Senha: %s\n", clientes[i].senha);
-            printf("Pos Extrato: %d", clientes[i].pos_extrato);
             printf("\n");
         }
     }
+    return OK;
 }
 
 // 4. Débito.
 int debito(conta clientes[], int *pos){
     printf("\n\nDébito de valores.\n");
 
-    printf("Digite seu CPF: ");
+    printf("\nDigite seu CPF: ");
     int pos_cpf = getIndex_cpf(clientes, pos);
     if (pos_cpf == -1){
         return CPF_nao_cadastrado;
@@ -156,6 +153,7 @@ int debito(conta clientes[], int *pos){
     char senha[Max_senha];
     printf("Digite a sua senha: ");
     fgets(senha, Max_senha, stdin);
+    senha[strcspn(senha, "\n")] = '\0';
 
     if (strcmp(senha, clientes[pos_cpf].senha) != 0){
         return Senha_incorreta;
@@ -171,24 +169,23 @@ int debito(conta clientes[], int *pos){
 
     float taxa;
     if(clientes[pos_cpf].tipo_conta == comum){
-        if (clientes[pos_cpf].saldo - valor <= Limite_Comum){
+        if (clientes[pos_cpf].saldo - (valor + (valor * Taxa_Comum)) < Limite_Comum){
             return Saldo_negativo_excedido;
         }else{
             taxa = valor * Taxa_Comum;
             clientes[pos_cpf].saldo -= valor + taxa;
-            printf("Débito realizado com sucesso!\n");
         }
     }else{
-        if (clientes[pos_cpf].saldo - valor <= Limite_Plus){
+        if (clientes[pos_cpf].saldo - (valor + (valor * Taxa_Plus)) < Limite_Plus){
             return Saldo_negativo_excedido;
         }else{
             taxa = valor * Taxa_Plus;
             clientes[pos_cpf].saldo -= valor + taxa;
-            printf("Débito realizado com sucesso!\n");
         }
     }
 
-    novo_extrato(clientes, pos_cpf, valor, Debito, '-',taxa);
+    novo_extrato(clientes, pos_cpf, valor, Debito, '-', taxa);
+    printf("Débito realizado com sucesso!\n");
 
     return OK;
 }
@@ -197,7 +194,7 @@ int debito(conta clientes[], int *pos){
 int deposito(conta clientes[], int *pos){
     printf("\n\nDepósito de valores.\n");
 
-    printf("Digite seu CPF: ");
+    printf("Digite o CPF cadastrado na conta para depósito: ");
     int pos_cpf = getIndex_cpf(clientes, pos);
     if (pos_cpf == -1){
         return CPF_nao_cadastrado;
@@ -213,9 +210,9 @@ int deposito(conta clientes[], int *pos){
     }
 
     clientes[pos_cpf].saldo += valor;
-    printf("Depósito realizado com sucesso!\n");
 
     novo_extrato(clientes, pos_cpf, valor, Deposito, '+', 0);
+    printf("Depósito realizado com sucesso!\n");
 
     return OK;
 }
@@ -234,9 +231,8 @@ int novo_extrato(conta clientes[], int pos_cpf, float valor, Operacoes tipo_oper
 
         // a posição vira 100 quando está cheio
         clientes[pos_cpf].pos_extrato += 1;
-    }
-    // Se não ele exclui o mais antigo e adiciona na ultima posição
-    else{
+    }else{ 
+        // Se estiver cheio, ele exclui o mais antigo e adiciona na ultima posição
         for(int i = 0; i < clientes[pos_cpf].pos_extrato; i++){
             clientes[pos_cpf].extrato[i] = clientes[pos_cpf].extrato[i+1];
         }
@@ -249,8 +245,7 @@ int novo_extrato(conta clientes[], int pos_cpf, float valor, Operacoes tipo_oper
 };
 
 int ver_extrato(conta clientes[], int *pos){
-    printf("\n\nExtrato.\n");
-
+    printf("\nExtrato.\n\n");
 
     printf("Digite seu CPF: ");
     int pos_cpf = getIndex_cpf(clientes, pos);
@@ -262,9 +257,9 @@ int ver_extrato(conta clientes[], int *pos){
     char senha[Max_senha];
     printf("Digite a sua senha: ");
     fgets(senha, Max_senha, stdin);
+    senha[strcspn(senha, "\n")] = '\0';
 
     if (strcmp(senha, clientes[pos_cpf].senha) != 0){
-        printf("Senha incorreta.");
         return Senha_incorreta;
     }
 
@@ -272,21 +267,17 @@ int ver_extrato(conta clientes[], int *pos){
         return Sem_extrato;
     }
 
-    char nome_arquivo[50];
+    char nome_arquivo[Max_CPF + 10];
     sprintf(nome_arquivo, "%s.txt", clientes[pos_cpf].cpf);
     FILE *arquivo_extrato = fopen(nome_arquivo, "w");
     if (arquivo_extrato == NULL) {
         return Erro_abrir;
     }
-    char* tipo_conta[2] = {
-        "Comum",
-        "Plus"
-    };
 
     fprintf(arquivo_extrato, "Extrato:\n");
     fprintf(arquivo_extrato, "Nome: %s\n", clientes[pos_cpf].nome);
     fprintf(arquivo_extrato, "CPF: %s\n", clientes[pos_cpf].cpf);
-    fprintf(arquivo_extrato, "Tipo de conta: %s\n", tipo_conta[clientes[pos_cpf].tipo_conta]);
+    fprintf(arquivo_extrato, "Tipo de conta: %s\n", clientes[pos_cpf].tipo_conta == comum ? "Comum" : "Plus");
     fprintf(arquivo_extrato, "Saldo atual: %.2f\n\n", clientes[pos_cpf].saldo);
     fprintf(arquivo_extrato, "Transações (Mais recente abaixo):\n");
 
@@ -307,6 +298,7 @@ int ver_extrato(conta clientes[], int *pos){
     }
 
     fclose(arquivo_extrato);
+    printf("Extrato gerado no arquivo \"%s\"\n", nome_arquivo);
 
     return OK;
 }
@@ -327,6 +319,7 @@ int transferencia(conta clientes[], int *pos){
     char senha[Max_senha];
     printf("Digite a sua senha: ");
     fgets(senha, Max_senha, stdin);
+    senha[strcspn(senha, "\n")] = '\0';
 
     if (strcmp(senha, clientes[pos_origem].senha) != 0){
         return Senha_incorreta;
@@ -349,7 +342,7 @@ int transferencia(conta clientes[], int *pos){
 
     float taxa;
     if (clientes[pos_origem].tipo_conta == comum){
-        if ((clientes[pos_origem].saldo - valor) <= Limite_Comum){
+        if ((clientes[pos_origem].saldo - (valor + (valor * Taxa_Comum))) < Limite_Comum){
             return Saldo_negativo_excedido;
         }else{
             int verif;
@@ -369,7 +362,7 @@ int transferencia(conta clientes[], int *pos){
             clientes[pos_destino].saldo += valor;
         }
     }else{
-        if ((clientes[pos_origem].saldo - valor) <= Limite_Plus){
+        if ((clientes[pos_origem].saldo - (valor + (valor * Taxa_Plus))) < Limite_Plus){
             return Saldo_negativo_excedido;
         }else{
             int verif;
@@ -390,11 +383,11 @@ int transferencia(conta clientes[], int *pos){
         }
     }
 
-    printf("Tranferência realizada com sucesso!\n");
-
     novo_extrato(clientes, pos_origem, valor, Transferencia, '-', taxa);
     novo_extrato(clientes, pos_destino, valor, Transferencia, '+', 0);
 
+    printf("Tranferência realizada com sucesso!\n");
+    
     return OK;
 }
 
@@ -413,7 +406,6 @@ int salvar(conta clientes[], int *pos){
     }
 
     fclose(f);
-    printf("Contas salvas com sucesso.\n");
     return OK;
 }
 
@@ -435,8 +427,39 @@ int carregar(conta clientes[], int *pos){
 	*pos = pos_load;
 
     fclose(f);
-    printf("Clientes carregados com sucesso.\n");
     return OK;
+}
+
+void trat_erros(int erro){
+    /* 
+    Erros {OK, Max_clientes_Erro, CPF_cadastrado, CPF_invalido, CPF_nao_cadastrado, Senha_incorreta, 
+     Valor_invalido, Saldo_negativo_excedido, Operacao_cancelada, Erro_abrir, Erro_escrever, Sem_extrato};
+    */
+    if (erro == OK){
+        return;
+    }else if (erro == Max_clientes_Erro){
+        printf("Número máximo de clientes alcançado.\n");
+    }else if (erro == CPF_cadastrado){
+        printf("CPF já cadastrado\n");
+    }else if (erro == CPF_invalido){
+        printf("CPF inválido\n");
+    }else if (erro == CPF_nao_cadastrado){
+        printf("CPF não encontrado entre os clientes\n");
+    }else if (erro == Senha_incorreta){
+        printf("Senha incorreta!\n");
+    }else if (erro == Valor_invalido){
+        printf("Valor inválido.\n");
+    }else if (erro == Saldo_negativo_excedido){
+        printf("Essa operação excede o valor negativo máximo de sua conta.\n");
+    }else if (erro == Operacao_cancelada){
+        printf("Operação cancelada.\n");
+    }else if (erro == Erro_abrir){
+        printf("Erro ao abrir arquivo.\n");
+    }else if (erro == Erro_escrever){
+        printf("Erro ao escrever no arquivo.\n");
+    }else if (erro == Sem_extrato){
+        printf("A conta não possui nenhuma transação salva no histórico.\n");
+    }
 }
 
 

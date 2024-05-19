@@ -35,8 +35,8 @@ typedef struct {
 int getIndex_cpf(const conta clientes[], int *pos);
 
 int add_cliente(conta clientes[], int *pos);
-void deletar_conta(conta clientes[], int *pos);
-void listar_clientes(conta clientes[], const int *pos);
+int deletar_conta(conta clientes[], int *pos);
+int listar_clientes(conta clientes[], const int *pos);
 int debito(conta clientes[], int *pos);
 int deposito(conta clientes[], int *pos);
 int ver_extrato(conta clientes[], int *pos);
@@ -46,5 +46,6 @@ int novo_extrato(conta clientes[], int pos_cpf, float valor, Operacoes tipo_oper
 int salvar(conta clientes[], int *pos);
 int carregar(conta clientes[], int *pos);
 
+void trat_erros(int erro);
 void clearBuffer();
 
