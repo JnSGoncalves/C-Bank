@@ -103,6 +103,7 @@ int deletar_conta(conta clientes[], int *pos) {
     if (index == -1) {
         return CPF_nao_cadastrado;
     }
+    strcpy(cpf, clientes[index].cpf);
 
     char senha[Max_senha];
     printf("Digite a sua senha: ");
@@ -119,6 +120,8 @@ int deletar_conta(conta clientes[], int *pos) {
 
     (*pos)--;
     printf("Conta com CPF %s deletada com sucesso.\n", cpf);
+
+    return OK;
 }
 
 // 3. Listar clientes.
