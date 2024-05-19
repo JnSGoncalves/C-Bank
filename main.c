@@ -34,33 +34,34 @@ int main() {
 
         switch (opcao) {
             case 1:
-                add_cliente(clientes, &pos);
+                erro = add_cliente(clientes, &pos);
                 break;
             case 2: {
-                deletar_conta(clientes, &pos);
+                erro = deletar_conta(clientes, &pos);
                 break;
             }
             case 3:
-                listar_clientes(clientes, &pos);
+                erro = listar_clientes(clientes, &pos);
                 break;
             case 4:
-                debito(clientes, &pos);
+                erro = debito(clientes, &pos);
                 break;
             case 5:
-                deposito(clientes, &pos);
+                erro = deposito(clientes, &pos);
                 break;
             case 6:
-                ver_extrato(clientes, &pos);
+                erro = ver_extrato(clientes, &pos);
                 break;
             case 7:
-                transferencia(clientes, &pos);
+                erro = transferencia(clientes, &pos);
                 break;
             case 0:
-                salvar(clientes, &pos);
+                erro = salvar(clientes, &pos);
                 break;
             default:
                 printf("Opção inválida!\n");
         }
+        trat_erros(erro);
     } while (opcao != 0);
 
     printf("Saindo...\n");
