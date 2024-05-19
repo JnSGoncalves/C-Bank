@@ -5,8 +5,8 @@
 #define Max_extrato 100
 #define Limite_Comum -1000
 #define Limite_Plus -5000
-#define Taxa_Comum 0.05
-#define Taxa_Plus 0.03
+#define Taxa_Comum 0.05F
+#define Taxa_Plus 0.03F
 
 typedef enum {comum, plus} Tipo_conta;
 typedef enum {OK, Max_clientes_Erro, CPF_cadastrado, CPF_invalido, CPF_nao_cadastrado, Senha_incorreta, 

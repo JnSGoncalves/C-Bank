@@ -226,7 +226,7 @@ int novo_extrato(conta clientes[], int pos_cpf, float valor, Operacoes tipo_oper
     if (clientes[pos_cpf].pos_extrato == -1)
         clientes[pos_cpf].pos_extrato = 0;
     if (clientes[pos_cpf].pos_extrato < Max_extrato){
-        printf("Extrato salvo\n");
+
         clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].valor = valor;
         clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].taxa = taxa;
         clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].tipo_operacao = tipo_operacao;
@@ -240,9 +240,6 @@ int novo_extrato(conta clientes[], int pos_cpf, float valor, Operacoes tipo_oper
         for(int i = 0; i < clientes[pos_cpf].pos_extrato; i++){
             clientes[pos_cpf].extrato[i] = clientes[pos_cpf].extrato[i+1];
         }
-        printf("Extrato salvo\n");
-
-
         // posição fica constante em 100, mas o indice final do array é 99 
         clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato - 1].valor = valor;
         clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato - 1].taxa = taxa;
@@ -275,16 +272,41 @@ int ver_extrato(conta clientes[], int *pos){
         return Sem_extrato;
     }
 
-    printf("\nOperação:\tValor:\tTaxa:\n");
-    for (int i = 0; i < clientes[pos_cpf].pos_extrato; i++){
-        if (clientes[pos_cpf].extrato[i].tipo_operacao == Debito){
-            printf("Debito\t%c R$ %.2f\t- R$ %.2f\n", clientes[pos_cpf].extrato[i].operador,clientes[pos_cpf].extrato[i].valor, clientes[pos_cpf].extrato[i].taxa);
-        }else if (clientes[pos_cpf].extrato[i].tipo_operacao == Deposito){
-            printf("Depósito\t%c R$ %.2f\t- R$ 0.00\n", clientes[pos_cpf].extrato[i].operador, clientes[pos_cpf].extrato[i].valor);
-        }else if (clientes[pos_cpf].extrato[i].tipo_operacao == Transferencia){
-            printf("Tranferência\t%c R$ %.2f\t- R$ %.2f\n", clientes[pos_cpf].extrato[i].operador,clientes[pos_cpf].extrato[i].valor, clientes[pos_cpf].extrato[i].taxa);
-        }
+    char nome_arquivo[50];
+    sprintf(nome_arquivo, "%s.txt", clientes[pos_cpf].cpf);
+    FILE *arquivo_extrato = fopen(nome_arquivo, "w");
+    if (arquivo_extrato == NULL) {
+        return Erro_abrir;
     }
+    char* tipo_conta[2] = {
+        "Comum",
+        "Plus"
+    };
+
+    fprintf(arquivo_extrato, "Extrato:\n");
+    fprintf(arquivo_extrato, "Nome: %s\n", clientes[pos_cpf].nome);
+    fprintf(arquivo_extrato, "CPF: %s\n", clientes[pos_cpf].cpf);
+    fprintf(arquivo_extrato, "Tipo de conta: %s\n", tipo_conta[clientes[pos_cpf].tipo_conta]);
+    fprintf(arquivo_extrato, "Saldo atual: %.2f\n\n", clientes[pos_cpf].saldo);
+    fprintf(arquivo_extrato, "Transações (Mais recente abaixo):\n");
+
+    for (int i = 0; i < clientes[pos_cpf].pos_extrato; i++) {
+        switch (clientes[pos_cpf].extrato[i].tipo_operacao){
+            case Debito:
+                fprintf(arquivo_extrato, "Operação: Débito\n");  
+                break;
+            case Transferencia:
+                fprintf(arquivo_extrato, "Operação: Transferência\n"); 
+                break;
+            case Deposito:
+                fprintf(arquivo_extrato, "Operação: Depósito\n");       
+        }
+        fprintf(arquivo_extrato, "Valor: %c R$ %.2f\n", clientes[pos_cpf].extrato[i].operador, clientes[pos_cpf].extrato[i].valor);
+        fprintf(arquivo_extrato, "Taxa: - R$ %.2f\n", clientes[pos_cpf].extrato[i].taxa);
+        fprintf(arquivo_extrato, "\n");
+    }
+
+    fclose(arquivo_extrato);
 
     return OK;
 }
