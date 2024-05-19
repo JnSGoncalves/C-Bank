@@ -5,6 +5,10 @@ int main() {
     printf("Banco - Quem Poupa Tem!\n");
 
     conta clientes[Tamanho_clientes];
+    // Define o padrão do pos_extrato como -1 para verificar se possui extrato cadastrado
+    for (int i = 0; i < Tamanho_clientes; i++){
+        clientes[i].pos_extrato = -1;
+    }
     int pos;
     int erro = carregar(clientes, &pos);
     if (erro == Erro_abrir){
@@ -43,10 +47,10 @@ int main() {
                 debito(clientes, &pos);
                 break;
             case 5:
-                deposito(clientes , &pos);
+                deposito(clientes, &pos);
                 break;
             case 6:
-                printf("Extrato.\n");
+                ver_extrato(clientes, &pos);
                 break;
             case 7:
                 transferencia(clientes, &pos);

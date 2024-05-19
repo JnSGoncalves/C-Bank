@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "funcoes.h"
+#include <time.h>
 
 // // Teste de verificação do tamanho do cpf digitado para não ser menor que 11 digitos e ser composto só de digitos
 // int verificarCPF(const char cpf[]){
@@ -135,6 +136,7 @@ void listar_clientes(conta clientes[], const int *pos){
             printf("Tipo de Conta: %s\n", clientes[i].tipo_conta == comum ? "Comum" : "Plus");
             printf("Saldo: %.2f\n", clientes[i].saldo);
             printf("Senha: %s\n", clientes[i].senha);
+            printf("Pos Extrato: %d", clientes[i].pos_extrato);
             printf("\n");
         }
     }
@@ -167,23 +169,28 @@ int debito(conta clientes[], int *pos){
         return Valor_invalido;
     }
 
+    float taxa;
     if(clientes[pos_cpf].tipo_conta == comum){
         if (clientes[pos_cpf].saldo - valor <= Limite_Comum){
             return Saldo_negativo_excedido;
         }else{
-            clientes[pos_cpf].saldo -= valor + (valor * Taxa_Comum);
+            taxa = valor * Taxa_Comum;
+            clientes[pos_cpf].saldo -= valor + taxa;
             printf("Débito realizado com sucesso!\n");
-            return OK;
         }
     }else{
         if (clientes[pos_cpf].saldo - valor <= Limite_Plus){
             return Saldo_negativo_excedido;
         }else{
-            clientes[pos_cpf].saldo -= valor + (valor * Taxa_Plus);
+            taxa = valor * Taxa_Plus;
+            clientes[pos_cpf].saldo -= valor + taxa;
             printf("Débito realizado com sucesso!\n");
-            return OK;
         }
     }
+
+    novo_extrato(clientes, pos_cpf, valor, Debito, '-',taxa);
+
+    return OK;
 }
 
 // 5. Depósito.
@@ -207,10 +214,80 @@ int deposito(conta clientes[], int *pos){
 
     clientes[pos_cpf].saldo += valor;
     printf("Depósito realizado com sucesso!\n");
+
+    novo_extrato(clientes, pos_cpf, valor, Deposito, '+', 0);
+
     return OK;
 }
 
 // 6. Extrato.
+int novo_extrato(conta clientes[], int pos_cpf, float valor, Operacoes tipo_operacao, char operador, float taxa){
+    // Se a posição for menor que 100 ele adiciona ao final da posição
+    if (clientes[pos_cpf].pos_extrato == -1)
+        clientes[pos_cpf].pos_extrato = 0;
+    if (clientes[pos_cpf].pos_extrato < Max_extrato){
+        printf("Extrato salvo\n");
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].valor = valor;
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].taxa = taxa;
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].tipo_operacao = tipo_operacao;
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato].operador = operador;
+
+        // a posição vira 100 quando está cheio
+        clientes[pos_cpf].pos_extrato += 1;
+    }
+    // Se não ele exclui o mais antigo e adiciona na ultima posição
+    else{
+        for(int i = 0; i < clientes[pos_cpf].pos_extrato; i++){
+            clientes[pos_cpf].extrato[i] = clientes[pos_cpf].extrato[i+1];
+        }
+        printf("Extrato salvo\n");
+
+
+        // posição fica constante em 100, mas o indice final do array é 99 
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato - 1].valor = valor;
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato - 1].taxa = taxa;
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato - 1].tipo_operacao = tipo_operacao;
+        clientes[pos_cpf].extrato[clientes[pos_cpf].pos_extrato - 1].operador = operador;
+    };
+};
+
+int ver_extrato(conta clientes[], int *pos){
+    printf("\n\nExtrato.\n");
+
+
+    printf("Digite seu CPF: ");
+    int pos_cpf = getIndex_cpf(clientes, pos);
+    if (pos_cpf == -1){
+        return CPF_nao_cadastrado;
+    }
+
+
+    char senha[Max_senha];
+    printf("Digite a sua senha: ");
+    fgets(senha, Max_senha, stdin);
+
+    if (strcmp(senha, clientes[pos_cpf].senha) != 0){
+        printf("Senha incorreta.");
+        return Senha_incorreta;
+    }
+
+    if (clientes[pos_cpf].pos_extrato == -1){
+        return Sem_extrato;
+    }
+
+    printf("\nOperação:\tValor:\tTaxa:\n");
+    for (int i = 0; i < clientes[pos_cpf].pos_extrato; i++){
+        if (clientes[pos_cpf].extrato[i].tipo_operacao == Debito){
+            printf("Debito\t%c R$ %.2f\t- R$ %.2f\n", clientes[pos_cpf].extrato[i].operador,clientes[pos_cpf].extrato[i].valor, clientes[pos_cpf].extrato[i].taxa);
+        }else if (clientes[pos_cpf].extrato[i].tipo_operacao == Deposito){
+            printf("Depósito\t%c R$ %.2f\t- R$ 0.00\n", clientes[pos_cpf].extrato[i].operador, clientes[pos_cpf].extrato[i].valor);
+        }else if (clientes[pos_cpf].extrato[i].tipo_operacao == Transferencia){
+            printf("Tranferência\t%c R$ %.2f\t- R$ %.2f\n", clientes[pos_cpf].extrato[i].operador,clientes[pos_cpf].extrato[i].valor, clientes[pos_cpf].extrato[i].taxa);
+        }
+    }
+
+    return OK;
+}
 
 
 // 7. Transferência entre contas
@@ -248,6 +325,7 @@ int transferencia(conta clientes[], int *pos){
         return Valor_invalido;
     }
 
+    float taxa;
     if (clientes[pos_origem].tipo_conta == comum){
         if ((clientes[pos_origem].saldo - valor) <= Limite_Comum){
             return Saldo_negativo_excedido;
@@ -264,8 +342,8 @@ int transferencia(conta clientes[], int *pos){
             if (verif != 1 || confirm == 'n' || confirm == 'N')
                 return Operacao_cancelada;
 
-            clientes[pos_origem].saldo -= valor;
-            valor -= valor * Taxa_Comum;
+            taxa = valor * Taxa_Comum;
+            clientes[pos_origem].saldo -= valor + taxa;
             clientes[pos_destino].saldo += valor;
         }
     }else{
@@ -284,11 +362,18 @@ int transferencia(conta clientes[], int *pos){
             if (verif != 1 || confirm == 'n' || confirm == 'N')
                 return Operacao_cancelada;
 
-            clientes[pos_origem].saldo -= valor;
-            valor -= valor * Taxa_Plus;
+            taxa = valor * Taxa_Plus;
+            clientes[pos_origem].saldo -= valor + taxa;
             clientes[pos_destino].saldo += valor;
         }
     }
+
+    printf("Tranferência realizada com sucesso!\n");
+
+    novo_extrato(clientes, pos_origem, valor, Transferencia, '-', taxa);
+    novo_extrato(clientes, pos_destino, valor, Transferencia, '+', 0);
+
+    return OK;
 }
 
 // Salvar em binário
